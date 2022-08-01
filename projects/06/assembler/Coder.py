@@ -1,0 +1,41 @@
+class Coder():
+  def __init__():
+    dst_dic = {}
+    dst_dic['null'] = '000'
+    dst_dic['M']    = '001'
+    dst_dic['D']    = '010'
+    dst_dic['MD']   = '011'
+    dst_dic['A']    = '100'
+    dst_dic['AM']   = '101'
+    dst_dic['AD']   = '110'
+    dst_dic['AMD']  = '111'
+
+    jmp_dic = {}
+    jmp_dic['null'] = '000'
+    jmp_dic['JGT']  = '001'
+    jmp_dic['JEQ']  = '010'
+    jmp_dic['JGE']  = '011'
+    jmp_dic['JLT']  = '100'
+    jmp_dic['JNE']  = '101'
+    jmp_dic['JLE']  = '110'
+    jmp_dic['JMP']  = '111'
+
+    cmp_dic = {}
+    cmp_dic['0']    = '101010'
+    cmp_dic['1']    = '111111'
+    cmp_dic['-1']   = '111010'
+    cmp_dic['D']    = '001100'
+    cmp_dic['A']    = '110000'
+    cmp_dic['!D']   = '001101'
+    cmp_dic['!A']   = '110001'
+    cmp_dic['-D']   = '001111'
+    cmp_dic['-A']   = '110011'
+    cmp_dic['D+1']  = '011111'
+    cmp_dic['A+1']  = '110111'
+    cmp_dic['D-1']  = '001110'
+    cmp_dic['A-1']  = '110010'
+    cmp_dic['D+A']  = '000010'
+    cmp_dic['D-A']  = '010011'
+    cmp_dic['A-D']  = '000111'
+    cmp_dic['D&A']  = '000000'
+    cmp_dic['D|A']  = '010101'
