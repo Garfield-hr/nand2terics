@@ -1,4 +1,5 @@
 class Coder():
+  CODE_LEN = 16
   def __init__(self):
     self.dst_dic = {}
     self.dst_dic['null'] = '000'
@@ -39,3 +40,31 @@ class Coder():
     self.cmp_dic['A-D']  = '000111'
     self.cmp_dic['D&A']  = '000000'
     self.cmp_dic['D|A']  = '010101'
+
+  def code_address(self, addr):
+    bin_str_addr = str(bin(int(addr)))[2:]
+    if len(bin_str_addr) < Coder.CODE_LEN:
+      bin_str_addr = "0" * (Coder.CODE_LEN - len(bin_str_addr)) + bin_str_addr
+      return bin_str_addr
+    elif len(bin_str_addr) == Coder.CODE_LEN:
+      return bin_str_addr
+    else:
+      return bin_str_addr[:16]
+    
+  def code_dst(self, dst):
+    try:
+      return self.dst_dic[dst]
+    except:
+      print("syntax error! ", dst, " is not a valid destination.")
+  
+  def code_cmp(self, cmp):
+    try:
+      return self.cmp_dic[cmp]
+    except:
+      print("syntax error! ", cmp, " is not a valid operation.")
+
+  def code_jmp(self, jmp):
+    try:
+      return self.jmp_dic[jmp]
+    except:
+      print("syntax error! ", jmp, " is not a valid jump command.")
