@@ -1,21 +1,17 @@
 class Parser:
   def __init__(self, input_file, output_file):
     self.resource = open(input_file, "r")
+    self.get_codes()
     self.destination = open(input_file, "w+")
     self.cmd_ind = -1
-    if (not self.resource.open() or not self.destination.open()):
-      print("Parser initialization failed, exit.")
-      return -1
-    else:
-      return 0
   
   def get_codes(self):
     self.codes = self.resource.readlines()
 
   def get_next_cmd(self):
-    if (self.cmd_ind < len(self.cmd_ind)):
-      ind += 1
-      self.current_cmd = self.codes[ind].strip()
+    if (self.cmd_ind + 1 < len(self.codes)):
+      self.cmd_ind += 1
+      self.current_cmd = self.codes[self.cmd_ind].strip()
       return True
     else:
       return False
