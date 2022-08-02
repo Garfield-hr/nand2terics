@@ -9,6 +9,7 @@ if __name__=="__main__":
     print("Usage: Python assembler.py inputFile.asm outputFile.hack")
     sys.exit(-1)
   parser = Parser(sys.argv[1], sys.argv[2])
+  parser.pre_process()
   coder = Coder()
   while (parser.get_next_cmd()):
     if (parser.get_current_cmd_type()):

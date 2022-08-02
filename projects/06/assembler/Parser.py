@@ -1,6 +1,3 @@
-from curses.ascii import isdigit
-
-
 class Parser:
   REGISTER_START = 15
   def __init__(self, input_file, output_file):
@@ -70,7 +67,7 @@ class Parser:
   def get_next_cmd(self):
     if (self.cmd_ind + 1 < len(self.codes)):
       self.cmd_ind += 1
-      self.current_cmd = self.codes[self.cmd_ind].strip()
+      self.current_cmd = self.codes[self.cmd_ind]
       return True
     else:
       return False
@@ -90,8 +87,8 @@ class Parser:
       cmd = cmd_list[1].strip()
     else:
       dst = "null"
-    if "," in cmd:
-      cmd_list = cmd.split(",")
+    if ";" in cmd:
+      cmd_list = cmd.split(";")
       jmp = cmd_list[1].strip()
       cmp = cmd_list[0].strip()
     else:
