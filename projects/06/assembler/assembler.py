@@ -1,4 +1,3 @@
-import code
 import sys
 from Parser import Parser
 from Coder import Coder
