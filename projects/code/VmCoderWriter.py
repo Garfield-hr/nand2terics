@@ -48,18 +48,86 @@ class VmCodeWriter(CodeWriter):
 
   def write_pop(self, code:list) -> None:
     _, seg, num = code
+    ## set A to address, D to value
     if seg == "pointer":
       if num == "0":
         self.write_pop_stack_to_D()
         self.write_code("@THIS")
-        self.write_code("M=D")
       elif num == "1":
         self.write_pop_stack_to_D()
         self.write_code("@THAT")
-        self.write_code("M=D")
       else:
         print("Syntax error, pointer num out of range, num:", num)
+
     elif seg == "static":
+      reg = VmCodeWriter.STATIC_VAR + num
+      self.write_pop_stack_to_D()
+      self.write_code("@" + reg)
+    elif seg == "temp":
+      reg = str(VmCodeWriter.TEMP_START + int(num))
+      self.write_pop_stack_to_D()
+      self.write_code("@" + reg)
+    elif seg in self.seg2pointer:
+      reg = self.seg2pointer[seg]
+      tmp_reg = self.write_addr_to_tmp(reg, num)
+      self.write_pop_stack_to_D()
+      self.write_code("@" + tmp_reg)
+      self.write_code("A=M")
+      
+    self.write_code("M=D")
+
+  def write_ari_log_code(self, op:str) -> None:
+    # get result and store in D register
+    if op == "neg":
+      self.write_pop_stack_to_D()
+      self.write_code("D=-D")
+    elif op == "not":
+      self.write_pop_stack_to_D()
+      self.write_code("D=!D")
+    else:
+      tmp_reg = str(VmCodeWriter.BASE_TMP_REG + self.tmp_reg_used)
+      # pop to tmp register
+      self.write_pop_stack_to_D()
+      self.write_code("@" + tmp_reg)
+      self.write_code("M=D")
+      self.write_pop_stack_to_D()
+      self.write_code("@" + tmp_reg)
+      if op == "add":
+        self.write_code("D=D+M")
+      elif op == "sub":
+        self.write_code("D=D-M")
+      elif op == "and":
+        self.write_code("D=D&M")
+      elif op == "or":
+        self.write_code("D=D|M")
+      else: 
+        # for logical operation, branching is necessary, template is as below
+        # D=D-M
+        # @LOGICAL_OP_TRUE_NUM
+        # D;JEQ / JGT / JLT
+        # @LOGICAL_OP_OUTSIDE_NUM
+        # D=0;JMP
+        # (LOGICAL_OP_TRUE_NUM)
+        # D=1
+        # (LOGICAL_OP_OUTSIDE_NUM) 
+        self.write_code("D=D-M")
+        self.write_code("@LOGICAL_OP_TRUE_" + str(self.logical_op_num))
+        if op == "eq":
+          self.write_code("D;JEQ")
+        elif op == "gt":
+          self.write_code("D;JGT")
+        elif op == "lt":
+          self.write_code("D;JLT")
+
+        self.write_code("@LOGICAL_OP_OUTSIDE_" + str(self.logical_op_num))
+        self.write_code("D=0;JMP")
+        self.write_code("(LOGICAL_OP_TRUE_" + str(self.logical_op_num) + ")")
+        self.write_code("D=-1") #0xFFFF
+        self.write_code("(LOGICAL_OP_OUTSIDE_" + str(self.logical_op_num) + ")") 
+        self.logical_op_num += 1
+
+    # push the result into stack
+    self.write_push_D_to_stack()
       
 
   def write_load_constant_to_D(self, num:str) -> None:
@@ -82,14 +150,12 @@ class VmCodeWriter(CodeWriter):
     self.write_code("AM=M-1")
     self.write_code("D=M")
 
-  def write_addr_to_tmp(self, reg:str, num:str) -> None:
+  def write_addr_to_tmp(self, reg:str, num:str) -> str:
     self.write_code("@" + reg)
     self.write_code("D=M")
     self.write_code("@" + num)
     self.write_code("D=D+A")
-    self.write_code("@R" + str(VmCodeWriter.BASE_TMP_REG + self.tmp_reg_used))
+    tmp_reg = str(VmCodeWriter.BASE_TMP_REG + self.tmp_reg_used)
+    self.write_code("@R" + tmp_reg)
     self.write_code("M=D")
-
-
-
-
+    return tmp_reg
