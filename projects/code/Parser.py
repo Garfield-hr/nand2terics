@@ -3,7 +3,7 @@ from xmlrpc.client import Boolean
 
 
 class Parser:
-  def __init__(self, source_file) -> None:
+  def __init__(self, source_file:str) -> None:
     try:
       source_file = open(source_file, 'r')
       self.source_codes = source_file.readlines()
@@ -35,6 +35,8 @@ class Parser:
       self.current_code = self.source_codes[self.ind]
       self.ind += 1
 
+    if "//" in self.current_code:
+        self.current_code = self.current_code.split("//")[0]
     return True
   
   def get_current_code(self) -> str:
