@@ -1,5 +1,4 @@
 import sys
-from xmlrpc.client import Boolean
 
 
 class Parser:
@@ -14,16 +13,16 @@ class Parser:
       print("Parser failed to open source file, quit.")
       sys.exit(1)
 
-  def has_next_code(self) -> Boolean:
+  def has_next_code(self) -> bool:
     return self.ind < len(self.source_codes)
 
-  def ignore_current_code(self) -> Boolean:
+  def ignore_current_code(self) -> bool:
     if not self.current_code.strip() or self.current_code.strip().startswith("//"):
       return True
     else:
       return False
     
-  def get_next_code(self) -> Boolean:
+  def get_next_code(self) -> bool:
     if not self.has_next_code():
       return False
     self.current_code = self.source_codes[self.ind]
