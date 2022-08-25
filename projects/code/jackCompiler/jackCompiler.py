@@ -3,12 +3,12 @@ from jackCompileEngine import CompileEngine
 import sys, os
 from xml.dom.minidom import Document
 
-def tokenize_one_file(file_name:str) -> None:
+def compile_one_file(file_name:str) -> None:
   tk = Tokenizer(file_name)
-  output_xml_name = file_name.replace(".jack", "M.xml")
+  output_xml_name = file_name.replace(".jack", ".vm")
   tg = tokenIter(tk.tokenize())
   ce = CompileEngine(tg, output_xml_name)
-  ce.compile_class()
+  ce.compile_file()
 
 class tokenIter:
   def __init__(self, tokenizer_generator) -> None:
@@ -38,4 +38,4 @@ if __name__ == '__main__':
         file_names.append(sys.argv[1] + "\\" + file)  
         
   for file_name in file_names:
-    tokenize_one_file(file_name)
+    compile_one_file(file_name)
