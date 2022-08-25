@@ -1,20 +1,10 @@
 from xml.dom.minidom import Document, Element
 from symbolTable import SymbolTable
-from jackWriter import jackCodeWriter
+from jackWriter import jackCodeWriter, VmVarKind
 
 os_allocate_func = "Memory.alloc"
 os_string_new = "String.new"
 os_string_append = "String.appendChar"
-
-class VmVarKind:
-    argument = "argument"
-    local = "local"
-    static = "static"
-    constant = "constant"
-    this = "this"
-    that = "that"
-    pointer = "pointer"
-    temp = "temp"
 
 class CompileEngine:
     def __init__(self, tg:iter, file_name:str, out_xml=False) -> None:
@@ -408,16 +398,11 @@ class CompileEngine:
             _, subroutine_name = self.eat_token(expected_token={"identifier": []})
             self.eat_token(expected_token={"symbol": ["("]})
             if function_type == "method":
-                arg_num = self.compile_parameterList_vm(has_this=True)
+                self.compile_parameterList_vm(has_this=True)
             else:
-                arg_num = self.compile_parameterList_vm(has_this=False)
+                self.compile_parameterList_vm(has_this=False)
             self.eat_token(expected_token={"symbol": [")"]})
-            self.wr.write_function(self.class_name + "." + subroutine_name, arg_num)
-            if function_type == "constructor": # call alloc to initialize obj
-                self.wr.write_push(VmVarKind.constant, self.class_var_ind["this"])
-                self.wr.write_call(os_allocate_func, 1)
-                self.wr.write_push(VmVarKind.pointer, 0)
-            self.compile_subroutineBody_vm()
+            self.compile_subroutineBody_vm(self.class_name + "." + subroutine_name, function_type == "constructor") # function declare will also be written in this
             self.wr.write_code("") # add a blank line between functions
             self.symbol_table.pop_last_symbol_table()
             return True
@@ -445,11 +430,16 @@ class CompileEngine:
                 has_next_arg, _ = self.eat_token(expected_token={"symbol": [","]}, allow_missing=True)
         return arg_ind
 
-    def compile_subroutineBody_vm(self) -> None:
+    def compile_subroutineBody_vm(self, function_name: str, is_constructor: bool) -> None:
         self.eat_token(expected_token={"symbol": ["{"]})
         self.local_ind = 0
         while self.compile_varDec_vm():
             pass
+        self.wr.write_function(function_name, self.local_ind)
+        if is_constructor: # call alloc to initialize obj
+            self.wr.write_push(VmVarKind.constant, self.class_var_ind["this"])
+            self.wr.write_call(os_allocate_func, 1)
+            self.wr.write_push(VmVarKind.pointer, 0)
         self.compile_statements_vm()
         self.eat_token(expected_token={"symbol": ["}"]})
 
@@ -527,7 +517,7 @@ class CompileEngine:
         self.eat_token(expected_token={"keyword": ["if"]})
         self.eat_token(expected_token={"symbol": ["("]})
         self.compile_expression_vm()
-        self.wr.write_arithmetic("~")
+        self.wr.write_arithmetic("not")
         label_else = "label" + str(self.label_num)
         self.label_num += 1
         label_end_if = "label" + str(self.label_num)
@@ -555,7 +545,7 @@ class CompileEngine:
         self.eat_token(expected_token={"symbol": ["("]})
         self.wr.write_label(label_while_cond)
         self.compile_expression_vm()
-        self.wr.write_arithmetic("~")
+        self.wr.write_arithmetic("not")
         self.wr.write_if(label_out)
         self.eat_token(expected_token={"symbol": [")"]})
         self.eat_token(expected_token={"symbol": ["{"]})
@@ -568,6 +558,7 @@ class CompileEngine:
       self.eat_token(expected_token={"keyword": ["do"]})
       self.compile_subroutineCall_vm()
       self.eat_token(expected_token={"symbol": [";"]})
+      self.wr.write_pop(VmVarKind.temp, 0)
 
     def compile_returnStatement_vm(self) -> None:
         self.eat_token(expected_token={"keyword": ["return"]})
@@ -677,6 +668,8 @@ class CompileEngine:
         if has_dot:
             _, func_name_after = self.eat_token(expected_token={"identifier": []})
             func_name += "." + func_name_after
+        else :
+            func_name = self.class_name + "." + func_name
         self.eat_token(expected_token={"symbol": ["("]})
         pair = self.tg.next()
         if not pair:

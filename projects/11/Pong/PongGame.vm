@@ -1,7 +1,7 @@
-function PongGame.new 0
 push constant 7
 call Memory.alloc 1
 push pointer 0
+function PongGame.new 0
 call Screen.clearScreen 0
 push constant 50
 pop this 6
@@ -60,7 +60,7 @@ pop this 5
 push pointer 0
 return
 
-function PongGame.dispose 1
+function PongGame.dispose 0
 call bat.dispose 0
 call ball.dispose 0
 push pointer 0
@@ -184,7 +184,7 @@ label label13
 push constant 0
 return
 
-function PongGame.moveBall 1
+function PongGame.moveBall 5
 call ball.move 0
 pop this 2
 push this 2

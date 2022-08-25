@@ -1,4 +1,4 @@
-function Main.main 0
+function Main.main 3
 push constant 10
 call Array.new 1
 pop local 0
@@ -657,13 +657,13 @@ call Output.println 0
 push constant 0
 return
 
-function Main.double 1
+function Main.double 0
 push argument 0
 push constant 2
 call Math.multiply 2
 return
 
-function Main.fill 2
+function Main.fill 0
 label label2
 push argument 1
 push constant 0

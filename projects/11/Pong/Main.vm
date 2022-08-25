@@ -1,4 +1,4 @@
-function Main.main 0
+function Main.main 1
 call PongGame.newInstance 0
 call PongGame.getInstance 0
 pop local 0

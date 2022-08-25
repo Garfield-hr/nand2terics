@@ -1,7 +1,7 @@
-function Ball.new 6
 push constant 15
 call Memory.alloc 1
 push pointer 0
+function Ball.new 0
 push argument 0
 pop this 0
 push argument 1
@@ -24,27 +24,27 @@ call show 0
 push pointer 0
 return
 
-function Ball.dispose 1
+function Ball.dispose 0
 push pointer 0
 call Memory.deAlloc 1
 push constant 0
 return
 
-function Ball.show 1
+function Ball.show 0
 push constant 1
 call Screen.setColor 1
 call draw 0
 push constant 0
 return
 
-function Ball.hide 1
+function Ball.hide 0
 push constant 0
 call Screen.setColor 1
 call draw 0
 push constant 0
 return
 
-function Ball.draw 1
+function Ball.draw 0
 push this 0
 push this 1
 push this 0
@@ -57,11 +57,11 @@ call Screen.drawRectangle 4
 push constant 0
 return
 
-function Ball.getLeft 1
+function Ball.getLeft 0
 push this 0
 return
 
-function Ball.getRight 1
+function Ball.getRight 0
 push this 0
 push constant 5
 add
@@ -133,7 +133,7 @@ pop this 6
 push constant 0
 return
 
-function Ball.move 1
+function Ball.move 0
 call hide 0
 push this 4
 push constant 0
@@ -275,7 +275,7 @@ call show 0
 push this 14
 return
 
-function Ball.bounce 2
+function Ball.bounce 5
 push this 2
 push constant 10
 call Math.divide 2

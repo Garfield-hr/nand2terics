@@ -1,5 +1,14 @@
 from CodeWriter import CodeWriter
 
+class VmVarKind:
+    argument = "argument"
+    local = "local"
+    static = "static"
+    constant = "constant"
+    this = "this"
+    that = "that"
+    pointer = "pointer"
+    temp = "temp"
 
 class jackCodeWriter(CodeWriter):
     def __init__(self, dest_file: str) -> None:
@@ -40,6 +49,9 @@ class jackCodeWriter(CodeWriter):
             self.write_code("not")
         elif op == "neg":
             self.write_code("neg")
+        elif op == "not":
+            self.write_push(VmVarKind.constant, 0)
+            self.write_arithmetic("=")
         else:
             raise RuntimeError("Unknown operator.")
 
