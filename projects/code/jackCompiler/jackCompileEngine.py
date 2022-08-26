@@ -1,10 +1,16 @@
 from xml.dom.minidom import Document, Element
 from symbolTable import SymbolTable
 from jackWriter import jackCodeWriter, VmVarKind
+from enum import Enum
 
 os_allocate_func = "Memory.alloc"
 os_string_new = "String.new"
 os_string_append = "String.appendChar"
+
+class FunctionCallType(Enum):
+    FUNCTION_OR_CONSTRUCTOR = 0
+    INSTANCE_METHOD = 1
+    INSIDE_METHOD = 2
 
 class CompileEngine:
     def __init__(self, tg:iter, file_name:str, out_xml=False) -> None:
@@ -397,17 +403,12 @@ class CompileEngine:
             self.eat_token(expected_token={"keyword": return_type, "identifier": []})
             _, subroutine_name = self.eat_token(expected_token={"identifier": []})
             self.eat_token(expected_token={"symbol": ["("]})
-            if function_type == "method":
-                self.compile_parameterList_vm(has_this=True)
-            else:
-                self.compile_parameterList_vm(has_this=False)
+            self.compile_parameterList_vm(function_type == "method")
             self.eat_token(expected_token={"symbol": [")"]})
-            self.compile_subroutineBody_vm(self.class_name + "." + subroutine_name, function_type == "constructor") # function declare will also be written in this
+            self.compile_subroutineBody_vm(self.class_name + "." + subroutine_name,function_type) # function declare will also be written in this
             self.wr.write_code("") # add a blank line between functions
             self.symbol_table.pop_last_symbol_table()
             return True
-        elif function_type == "function":
-            pass
         else:
             return False
 
@@ -430,16 +431,19 @@ class CompileEngine:
                 has_next_arg, _ = self.eat_token(expected_token={"symbol": [","]}, allow_missing=True)
         return arg_ind
 
-    def compile_subroutineBody_vm(self, function_name: str, is_constructor: bool) -> None:
+    def compile_subroutineBody_vm(self, function_name: str, function_type: str) -> None:
         self.eat_token(expected_token={"symbol": ["{"]})
         self.local_ind = 0
         while self.compile_varDec_vm():
             pass
         self.wr.write_function(function_name, self.local_ind)
-        if is_constructor: # call alloc to initialize obj
+        if function_type == "constructor": # call alloc to initialize obj
             self.wr.write_push(VmVarKind.constant, self.class_var_ind["this"])
             self.wr.write_call(os_allocate_func, 1)
-            self.wr.write_push(VmVarKind.pointer, 0)
+            self.wr.write_pop(VmVarKind.pointer, 0)
+        elif function_type == "method":
+            self.wr.write_push(VmVarKind.argument, 0)
+            self.wr.write_pop(VmVarKind.pointer, 0)
         self.compile_statements_vm()
         self.eat_token(expected_token={"symbol": ["}"]})
 
@@ -663,22 +667,36 @@ class CompileEngine:
                 self.wr.write_push(symbol_val.kind, symbol_val.ind)
                   
     def compile_subroutineCall_vm(self) -> None:
-        _, func_name = self.eat_token(expected_token={"identifier": []})
+        _, id = self.eat_token(expected_token={"identifier": []})
         has_dot, _ = self.eat_token(expected_token={"symbol": ["."]}, allow_missing=True)
+        instance_method_call = FunctionCallType.FUNCTION_OR_CONSTRUCTOR
         if has_dot:
             _, func_name_after = self.eat_token(expected_token={"identifier": []})
-            func_name += "." + func_name_after
+            id_val = self.symbol_table.get_symbol_val(id)
+            if id_val: # id is a class instance
+                instance_method_call = FunctionCallType.INSTANCE_METHOD
+                func_name = id_val.type + "." + func_name_after
+            else:
+                func_name = id + "." + func_name_after
         else :
-            func_name = self.class_name + "." + func_name
+            instance_method_call = FunctionCallType.INSIDE_METHOD
+            func_name = self.class_name + "." + id
         self.eat_token(expected_token={"symbol": ["("]})
         pair = self.tg.next()
         if not pair:
             raise RuntimeError("syntax error, reach end of file and expect )")
         _, value = pair
         self.tg.back(pair)
-        arg_num = 0
+        if instance_method_call  == FunctionCallType.INSTANCE_METHOD: # push this
+            self.wr.write_push(id_val.kind, id_val.ind)
+            arg_num = 1
+        elif instance_method_call == FunctionCallType.INSIDE_METHOD:
+            self.wr.write_push(VmVarKind.pointer, 0)
+            arg_num = 1
+        else: # Function or constructor
+            arg_num = 0
         if value != ")":
-            arg_num = self.compile_expressionList_vm()
+            arg_num += self.compile_expressionList_vm()
         self.eat_token(expected_token={"symbol": [")"]})
         self.wr.write_call(func_name, arg_num)
         

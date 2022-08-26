@@ -30,7 +30,7 @@ class SymbolTable:
 
     def get_symbol_val_help(self, symbol:str, ind):
         if ind < 0:
-            raise RuntimeError("Symbol is not in the symbol table.")
+            return False
         curr_dict = self.symbolLinkedList[ind]
         if symbol in curr_dict:
             return curr_dict[symbol]

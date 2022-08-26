@@ -1,7 +1,7 @@
+function Bat.new 0
 push constant 5
 call Memory.alloc 1
-push pointer 0
-function Bat.new 0
+pop pointer 0
 push argument 0
 pop this 0
 push argument 1
@@ -12,31 +12,48 @@ push argument 3
 pop this 3
 push constant 2
 pop this 4
-call show 0
+push pointer 0
+call Bat.show 1
+pop temp 0
 push pointer 0
 return
 
 function Bat.dispose 0
+push argument 0
+pop pointer 0
 push pointer 0
 call Memory.deAlloc 1
+pop temp 0
 push constant 0
 return
 
 function Bat.show 0
+push argument 0
+pop pointer 0
 push constant 1
 call Screen.setColor 1
-call draw 0
+pop temp 0
+push pointer 0
+call Bat.draw 1
+pop temp 0
 push constant 0
 return
 
 function Bat.hide 0
+push argument 0
+pop pointer 0
 push constant 0
 call Screen.setColor 1
-call draw 0
+pop temp 0
+push pointer 0
+call Bat.draw 1
+pop temp 0
 push constant 0
 return
 
 function Bat.draw 0
+push argument 0
+pop pointer 0
 push this 0
 push this 1
 push this 0
@@ -46,38 +63,54 @@ push this 1
 push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 push constant 0
 return
 
 function Bat.setDirection 0
+push argument 0
+pop pointer 0
 push argument 1
 pop this 4
 push constant 0
 return
 
 function Bat.getLeft 0
+push argument 0
+pop pointer 0
 push this 0
 return
 
 function Bat.getRight 0
+push argument 0
+pop pointer 0
 push this 0
 push this 2
 add
 return
 
 function Bat.setWidth 0
-call hide 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Bat.hide 1
+pop temp 0
 push argument 1
 pop this 2
-call show 0
+push pointer 0
+call Bat.show 1
+pop temp 0
 push constant 0
 return
 
 function Bat.move 0
+push argument 0
+pop pointer 0
 push this 4
 push constant 1
 eq
-not
+push constant 0
+eq
 if-goto label0
 push this 0
 push constant 4
@@ -86,7 +119,8 @@ pop this 0
 push this 0
 push constant 0
 lt
-not
+push constant 0
+eq
 if-goto label2
 push constant 0
 pop this 0
@@ -95,6 +129,7 @@ label label2
 label label3
 push constant 0
 call Screen.setColor 1
+pop temp 0
 push this 0
 push this 2
 add
@@ -110,8 +145,10 @@ push this 1
 push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 push constant 1
 call Screen.setColor 1
+pop temp 0
 push this 0
 push this 1
 push this 0
@@ -121,6 +158,7 @@ push this 1
 push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 goto label1
 label label0
 push this 0
@@ -132,7 +170,8 @@ push this 2
 add
 push constant 511
 gt
-not
+push constant 0
+eq
 if-goto label4
 push constant 511
 push this 2
@@ -143,6 +182,7 @@ label label4
 label label5
 push constant 0
 call Screen.setColor 1
+pop temp 0
 push this 0
 push constant 4
 sub
@@ -154,8 +194,10 @@ push this 1
 push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 push constant 1
 call Screen.setColor 1
+pop temp 0
 push this 0
 push this 2
 add
@@ -169,6 +211,7 @@ push this 1
 push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 label label1
 push constant 0
 return
